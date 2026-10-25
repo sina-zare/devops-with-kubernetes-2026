@@ -1,5 +1,5 @@
 
-# Log output - Exercise 1.1
+# Log output
 
 This application was created for exercise 1.1 of the University of Helsinki
 DevOps with Kubernetes 2026 course.
