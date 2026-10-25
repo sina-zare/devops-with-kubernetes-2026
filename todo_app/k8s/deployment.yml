@@ -21,4 +21,4 @@ spec:
               containerPort: 9090
           env:
             - name: PORT
-              value: "9090"
+              value: "8585"
