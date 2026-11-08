@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: log-output
-          image: log_output:1.0
+          image: log_output:1.1
           imagePullPolicy: Never
           ports:
             - name: http
