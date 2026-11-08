@@ -17,3 +17,7 @@ spec:
         - name: log-output
           image: log_output:1.0
           imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8787
+              protocol: TCP
