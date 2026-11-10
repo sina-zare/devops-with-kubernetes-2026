@@ -15,5 +15,6 @@ DevOps with Kubernetes course.
 | [1.5](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.5/todo_app) | [Todo app](todo_app/) | Same todo app for project 1.4, now returns a simple HTTP page at `GET /` and accessible through kubectl port-forward.|
 | [1.6](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.6/todo_app) | [Todo app](todo_app/) | Same todo app for project 1.5, now configured NodePort Service to access the project|
 | [1.7](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.7/log_output) | [Log output](log_output/) | log_output app that now has an http endpoint at `/` and made accessible to browser via ingress and ClusterIP service manifests|
+| [1.8](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.8/todo_app) | [Todo app](todo_app/) | Todo app that now has an http endpoint at `/` and made accessible to browser via ingress and ClusterIP service manifests|
 
 Each exercise is documented in its application's README. GitHub Releases are used to identify the completed state of each exercise.
