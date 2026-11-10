@@ -1,114 +1,123 @@
-# Log output
+# Ping-Pong Application
 
-This application was created for the University of Helsinki **DevOps with Kubernetes 2026** course.
+A simple web application built with Python and FastAPI for University of Helsinki's `DevOps with Kubernetes course`
 
-## Description
+The application exposes a `GET /pingpong` endpoint that returns a response containing `pong` and an incrementing counter.
 
-The application generates a random string when it starts, keeps the string in memory, and prints it to standard output every five seconds together with a UTC timestamp.
+## Application
 
-It also exposes an HTTP endpoint using **FastAPI** and **Uvicorn** to retrieve the current application status.
+- `app.py` - Starts the FastAPI web server and implements the application endpoints.
+- `requirements.txt` - Lists the Python dependencies.
+- `Dockerfile` - Builds the application image.
+- `k8s/deployment.yml` - Defines the Kubernetes Deployment.
+- `k8s/service.yml` - Defines the Kubernetes ClusterIP Service.
 
-Example log output:
+### Endpoints
+
+| Endpoint | Description |
+|---|---|
+| `GET /pingpong` | Returns `pong` followed by an incrementing counter. |
+| `GET /` | Returns a simple HTML page guiding users to explore `/pingpong`. |
+
+Example responses from consecutive requests:
 
 ```text
-2026-11-08T13:35:52.423Z: ucnl-0c5b-batg
-2026-11-08T13:35:57.424Z: ucnl-0c5b-batg
-2026-11-08T13:36:02.424Z: ucnl-0c5b-batg
+pong 0
+pong 1
+pong 2
+pong 3
 ```
 
-The random string remains the same while the application process is running, while the timestamp is updated every five seconds.
+The counter is stored in application memory. It resets when the application restarts, and each replica maintains its own counter.
 
-### HTTP endpoint
+## Build the Docker image
 
-The application exposes the current status through:
-
-```http
-GET /
-```
-
-Example response:
-
-```json
-{
-  "timestamp": "2026-11-08T13:35:52.423Z",
-  "random_string": "ucnl-0c5b-batg"
-}
-```
-
-The HTTP server listens on port `8787`.
-
-## Project files
-
-- `app.py` - application logic, logging loop, and FastAPI HTTP endpoint
-- `requirements.txt` - Python dependencies (FastAPI and Uvicorn)
-- `Dockerfile` - container image definition
-- `k8s/deployment.yml` - Kubernetes deployment configuration
-- `k8s/service.yml` - ClusterIP service exposing the application internally
-- `k8s/ingress.yml` - Kubernetes Ingress configuration for external HTTP access
-- `screenshots/log_output.png` - screenshot of the application accessed through Ingress
-
-## Build and deploy
-
-Build the container image:
+From the repository root:
 
 ```bash
-docker build -t log_output:1.1 .
+docker build -t ping_pong:1.0 ./ping_pong
 ```
 
-In k3d, import the image into the cluster:
+## Deploy to Kubernetes
+
+Import the image into your k3d cluster. Replace `YOUR_CLUSTER_NAME` with your cluster name:
 
 ```bash
-k3d image import log_output:1.1 -c <cluster-name>
+k3d image import ping_pong:1.0 -c YOUR_CLUSTER_NAME
 ```
 
-Apply the Kubernetes resources:
+Apply the Deployment and Service:
 
 ```bash
-kubectl apply -f k8s/deployment.yml
-kubectl apply -f k8s/service.yml
-kubectl apply -f k8s/ingress.yml
+kubectl apply -f ping_pong/k8s/deployment.yml
+kubectl apply -f ping_pong/k8s/service.yml
 ```
 
-## External access with Ingress
+The Deployment runs one replica of the application:
 
-The application is exposed externally through Kubernetes Ingress using the **Traefik Ingress Controller**, which is available in the k3d cluster.
+- Container image: `ping_pong:1.0`
+- Container port: `8181`
+- Image pull policy: `Never`
 
-The traffic flow is:
+The Service exposes port `80` internally and forwards traffic to container port `8181`.
+
+## Ingress configuration
+
+The Ping-Pong application shares the existing `log-output-ingress` with the Log Output application present at [Log output Ingress](../log_output/k8s/ingress.yml).
+
+The Ingress routes requests based on their URL paths:
+
+| Path | Backend Service |
+|---|---|
+| `/` | `log-output-svc:80` |
+| `/pingpong` | `ping-pong-svc:80` |
+
+The `/pingpong` path is routed to the Ping-Pong application, while `/` is handled by the Log Output application.
+
+The existing Ingress is updated to include the Ping-Pong routing rule. No separate Ingress resource is required.
+
+Apply the updated shared Ingress manifest:
+
+```bash
+kubectl apply -f log_output/k8s/ingress.yml
+```
+
+## Access the application
+
+With the k3d host port mapped to `8081`, access the Ping-Pong endpoint through the shared Ingress:
+
+```text
+http://localhost:8081/pingpong
+```
+
+Send multiple requests to observe the counter increasing.
+
+
+## Networking overview
+
+The request flow for Ping-Pong is:
 
 ```text
 Browser
    |
-   v
-k3d Load Balancer (host port 8081)
+   | http://localhost:8081/pingpong
    |
-   v
-Traefik Ingress Controller (port 80)
+k3d Load Balancer
    |
-   v
-Kubernetes Ingress
+   | Port 80
    |
-   v
-log-output-svc (port 80)
+Traefik Ingress Controller
    |
-   v
-Log Output Pod (port 8787)
+   | /pingpong
+   |
+log-output-ingress
+   |
+   | ping-pong-svc:80
+   |
+Ping-Pong Pod:8181
 ```
-
-The k3d cluster exposes port `80` through host port `8081`.
-
-Access the application using:
-
-```text
-http://<cluster-ip>:8081/
-```
-
-### Application screenshot
-
-![Log Output application accessed through Kubernetes Ingress](./screenshots/log_output.png)
-
 
 ## Exercises
 
 - Course: DevOps with Kubernetes 2026
-- Exercise 1.1 - Getting started
-- Exercise 1.7 - External access with Ingress
+- Exercise 1.9
