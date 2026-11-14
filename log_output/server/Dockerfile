@@ -5,9 +5,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt --index-url https://repo.abramad.com/repository/pypi-proxy/simple --trusted-host repo.abramad.com
 
-COPY app.py .
+COPY server.py .
 
 ENV PORT=8787
 EXPOSE 8787
 
-CMD ["python", "app.py"]
+CMD ["python", "server.py"]

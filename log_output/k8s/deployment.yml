@@ -13,9 +13,22 @@ spec:
       labels:
         app: log-output
     spec:
+      volumes:
+        - name: shared-log-output
+          emptyDir: {}
       containers:
-        - name: log-output
-          image: log_output:1.1
+        - name: log-output-generator
+          image: log_output_generator:1.0
+          volumeMounts:
+          - name: shared-log-output
+            mountPath: /shared
+          imagePullPolicy: Never
+
+        - name: log-output-server
+          image: log_output_server:1.0
+          volumeMounts:
+          - name: shared-log-output
+            mountPath: /shared
           imagePullPolicy: Never
           ports:
             - name: http
