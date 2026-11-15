@@ -17,5 +17,6 @@ DevOps with Kubernetes course.
 | [1.7](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.7/log_output) | [Log output](log_output/) | log_output app that now has an http endpoint at `/` and made accessible to browser via ingress and ClusterIP service manifests|
 | [1.8](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.8/todo_app) | [Todo app](todo_app/) | Todo app that now has an http endpoint at `/` and made accessible to browser via ingress and ClusterIP service manifests|
 | [1.9](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.9/ping_pong) | [Ping pong](ping_pong/) | Create a second FastAPI application with an in-memory request counter that returns an incrementing `pong` response at `GET /pingpong`. Route requests through the existing Log Output Ingress using path-based routing. |
+| [1.10](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.10/log_output) | [Log output](log_output/) | log_output app now running with 2 containers, one server and one generator using one `emptyDir` shared volume. |
 
 Each exercise is documented in its application's README. GitHub Releases are used to identify the completed state of each exercise.
