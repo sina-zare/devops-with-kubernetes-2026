@@ -13,9 +13,6 @@ spec:
       labels:
         app: log-output
     spec:
-      volumes:
-        - name: shared-log-output
-          emptyDir: {}
       containers:
         - name: log-output-generator
           image: log_output_generator:1.0
@@ -34,3 +31,15 @@ spec:
             - name: http
               containerPort: 8787
               protocol: TCP
+          
+          volumeMounts:
+            - name: shared-storage
+              mountPath: /data
+
+      volumes:
+        - name: shared-log-output
+          emptyDir: {}
+
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: shared-pvc

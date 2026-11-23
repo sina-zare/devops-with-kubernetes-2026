@@ -21,3 +21,12 @@ spec:
             - name: http
               containerPort: 8181
               protocol: TCP
+          
+          volumeMounts:
+            - name: shared-storage
+              mountPath: /data
+      
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: shared-pvc
