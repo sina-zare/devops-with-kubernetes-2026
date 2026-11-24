@@ -2,17 +2,26 @@ import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-
+from pathlib import Path
 
 PORT = int(os.getenv("PORT", "8181"))
 app = FastAPI()
-counter = 0
+
+counter_file = Path("/data/pingpong.txt")
+if counter_file.exists():
+    counter = int(counter_file.read_text().strip())
+else:
+    counter = 0
+
+print(f"Initial counter value: {counter}")
+
 
 @app.get("/pingpong")
 def pingpong():
     global counter
     response = f"pong {counter}"
     counter += 1
+    counter_file.write_text(str(counter))
 
     return response
 
