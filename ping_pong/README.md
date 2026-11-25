@@ -1,8 +1,10 @@
 # Ping-Pong Application
 
-A simple web application built with Python and FastAPI for University of Helsinki's `DevOps with Kubernetes course`
+A simple web application built with Python and FastAPI for the University of Helsinki's `DevOps with Kubernetes` course.
 
-The application exposes a `GET /pingpong` endpoint that returns a response containing `pong` and an incrementing counter.
+The application exposes a `GET /pingpong` endpoint that returns a response containing `pong` and an incrementing request counter.
+
+The request counter is persisted to a shared file on a Kubernetes PersistentVolumeClaim, allowing the counter to survive application Pod restarts and be accessed by the Log Output application.
 
 ## Application
 
@@ -28,7 +30,18 @@ pong 2
 pong 3
 ```
 
-The counter is stored in application memory. It resets when the application restarts, and each replica maintains its own counter.
+The request counter is stored in `/data/pingpong.txt` on a shared PersistentVolumeClaim instead of application memory.
+
+On each `/pingpong` request, the application:
+
+1. Reads the current counter value from the persistent file.
+2. Increments the counter.
+3. Writes the updated value back to the file.
+4. Returns the updated counter in the HTTP response.
+
+The counter is shared with the Log Output application, which reads the same file and includes its value in its HTTP response.
+
+Unlike an in-memory counter, the persisted counter survives Pod recreation and application restarts, provided the underlying persistent storage remains available.
 
 ## Build the Docker image
 
@@ -60,6 +73,25 @@ The Deployment runs one replica of the application:
 - Image pull policy: `Never`
 
 The Service exposes port `80` internally and forwards traffic to container port `8181`.
+
+## Persistent storage
+
+The Ping-Pong application uses a Kubernetes PersistentVolumeClaim (`shared-pvc`) to store its request counter.
+
+The PVC is mounted inside the container at `/data`, and the application stores its counter in:
+
+```text
+/data/pingpong.txt
+```
+
+The same PVC is mounted by the Log Output application, allowing both applications to access the shared counter file.
+
+The storage resources are defined separately from the application manifests at the project level:
+
+- **PersistentVolume (`shared-pv`):** Provides the underlying local storage.
+- **PersistentVolumeClaim (`shared-pvc`):** Requests and binds to the available PersistentVolume.
+
+The volume is independent of the application Pod lifecycle. However, this implementation uses local node storage, so it does not provide automatic storage failover if the Kubernetes node becomes unavailable.
 
 ## Ingress configuration
 
@@ -121,3 +153,4 @@ Ping-Pong Pod:8181
 
 - Course: DevOps with Kubernetes 2026
 - Exercise 1.9
+- Exercise 1.11
