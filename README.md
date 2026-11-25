@@ -21,3 +21,46 @@ DevOps with Kubernetes course.
 | [1.11](https://github.com/sina-zare/devops-with-kubernetes-2026/tree/1.11) | Log output / Ping-Pong | Introduce Kubernetes PersistentVolumes and PersistentVolumeClaims to share persistent data between applications. The Ping-Pong request counter is stored in persistent storage and exposed through the Log Output application. |
 
 Each exercise is documented in its application's README. GitHub Releases are used to identify the completed state of each exercise.
+
+## Storage architecture
+
+Starting with Exercise 1.11, the project uses Kubernetes PersistentVolumes (PV) and PersistentVolumeClaims (PVC) to share persistent data between applications.
+
+The storage resources are defined separately from application-specific Kubernetes manifests.
+
+### Shared storage
+
+The `log_output` and `ping_pong` applications use the same PersistentVolumeClaim (`shared-pvc`), which is bound to a PersistentVolume (`shared-pv`).
+
+The underlying storage is a local directory on a Kubernetes node.
+
+```text
+                  Kubernetes Cluster
+                          |
+              +-----------+-----------+
+              |                       |
+         Log Output              Ping-Pong
+              |                       |
+              +-----------+-----------+
+                          |
+                    shared-pvc
+                          |
+                     shared-pv
+                          |
+                 Local Node Storage
+                    /tmp/kube
+```
+
+### Storage resources
+
+| Resource | Purpose |
+|---|---|
+| PersistentVolume (`shared-pv`) | Defines the available persistent storage. |
+| PersistentVolumeClaim (`shared-pvc`) | Requests and binds to the PersistentVolume. |
+| `emptyDir` | Provides temporary shared storage between containers inside the Log Output Pod. |
+
+The PersistentVolume and PersistentVolumeClaim are managed independently of the application Deployments.
+
+This implementation demonstrates the difference between Pod-scoped temporary storage and persistent storage that can be reused by multiple application Pods.
+
+**Note:** The current implementation uses local node storage for learning purposes. It demonstrates persistence across Pod recreation, but does not provide node-level storage high availability or automatic replication.
